@@ -6,6 +6,7 @@ import (
 	"os"
 	"fmt"
 	"net/http"
+	"encoding/json"
 )
 
 // Define env var map globally
@@ -43,6 +44,28 @@ func initEnvVars (varsToLoad []string) {
 	fmt.Print("\n")
 }
 
+func h1(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("Request received from %s.\n", r.Header.Get("User-Agent"))
+	w.Header().Set("Content-Type", "application/json")
+
+	resData, err := json.Marshal(struct{
+		Name string
+		Age int
+	}{
+		"Dane",
+		24,
+	})
+	if err != nil {
+		log.Printf("Error marshaling JSON: %v\n", err)
+	}
+	
+	fmt.Printf("Sending data: %s\n", resData)
+	_, err = w.Write(resData)
+	if err != nil {
+		log.Printf("Error writing response: %s\n", err)
+	}
+}
+
 func main() {
 	initEnvVars([]string {
 		"PORT",
@@ -57,6 +80,3 @@ func main() {
 	log.Fatal(err)
 }
 
-func h1(_ http.ResponseWriter, _ *http.Request) {
-	fmt.Printf("Request received.\n\n")
-}
