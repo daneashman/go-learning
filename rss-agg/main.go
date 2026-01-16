@@ -1,51 +1,14 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
 	"log"
-	"os"
 	"fmt"
 	"net/http"
 	"encoding/json"
 )
 
-// Define env var map globally
-// All env vars should be accessed through here, e.g env["PORT"]
-var env map[string]string
-
-func initEnvVars (varsToLoad []string) {
-	// Make sure there are env vars passed in
-	if len(varsToLoad) == 0 {
-		log.Fatal("No env vars registered.")
-	}
-
-	// Init map for global env map
-	env = make(map[string]string)
-
-	// Load in .env
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Get env vars
-	for _, v := range varsToLoad {
-		env[v] = os.Getenv(v)
-		if env[v] == "" {
-			log.Fatalf("No %s defined in .env.", env[v])
-		}
-	}
-	
-	// Logging result
-	fmt.Printf("Loaded environment variables...\n")
-	for k, v := range env {
-		fmt.Printf("%v: %v\n", k, v)
-	}
-	fmt.Print("\n")
-}
-
 func h1(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("Request received from %s.\n", r.Header.Get("User-Agent"))
+	fmt.Printf("Request received at %s from %s.\n", r.Pattern, r.Header.Get("User-Agent"))
 	w.Header().Set("Content-Type", "application/json")
 
 	resData, err := json.Marshal(struct{
@@ -67,16 +30,25 @@ func h1(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	initEnvVars([]string {
-		"PORT",
-	})
+	// Setup and import env vars
+	env, err := initEnvVars()
+	if err != nil {
+		log.Fatal(err)
+	}
+	env.import("PORT")
 
-	// Init handler func
+	// Register handler funcs
 	http.HandleFunc("/", h1)
 
+	// Set the port var
+	port, err := env.get("PORT")
+	if err != nil {
+		log.Fatal(err) 
+	}
+
 	// Start listening
-	fmt.Printf("Listening on port %s...\n\n", env["PORT"])
-	err := http.ListenAndServe(":"+env["PORT"], nil)
+	fmt.Printf("Listening on port %s...\n\n", port)
+	err = http.ListenAndServe(":"+port, nil)
 	log.Fatal(err)
 }
 
