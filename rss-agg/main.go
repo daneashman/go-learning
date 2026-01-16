@@ -35,10 +35,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	env.import("PORT")
+	env.register("PORT")
 
 	// Register handler funcs
-	http.HandleFunc("/", h1)
+	http.HandleFunc("GET /", h1)
 
 	// Set the port var
 	port, err := env.get("PORT")

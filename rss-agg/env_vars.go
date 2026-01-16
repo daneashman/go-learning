@@ -11,7 +11,8 @@ type Env struct {
 	vars map[string]string
 }
 
-func (e *Env) import(inputVars ...string) error {
+// Registers a new env var for use
+func (e *Env) register(inputVars ...string) error {
 	// Make sure there are env vars passed in
 	if len(inputVars) == 0 {
 		return errors.New("No env vars inputted.")
