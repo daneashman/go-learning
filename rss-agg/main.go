@@ -3,8 +3,10 @@ package main
 import (
 	"log"
 	"fmt"
+	"os"
 	"net/http"
 	"encoding/json"
+	"github.com/joho/godotenv"
 )
 
 func h1(w http.ResponseWriter, r *http.Request) {
@@ -38,12 +40,11 @@ func (h httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// Setup and import env vars
-	env, err := initEnvVars()
+	// Set env vars
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
-	env.register("PORT")
 
 	// Register handler funcs on endpoints
 	endpoints := map[string]func(w http.ResponseWriter, r *http.Request){
@@ -54,13 +55,8 @@ func main() {
 		http.Handle(e, httpHandler{f: f})
 	}
 
-	// Set the port var
-	port, err := env.get("PORT")
-	if err != nil {
-		log.Fatal(err) 
-	}
-
 	// Start listening
+	port := os.Getenv("PORT")
 	fmt.Printf("Listening on port %s...\n\n", port)
 	err = http.ListenAndServe(":"+port, nil)
 	log.Fatal(err)
