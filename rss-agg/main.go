@@ -48,8 +48,9 @@ func main() {
 
 	// Register handler funcs on endpoints
 	endpoints := map[string]func(w http.ResponseWriter, r *http.Request){
-		"GET /": h1, 
-		"POST /feeds": handleCreateFeed,
+		"GET /":		h1, 
+		"POST /feeds":	handleCreateFeed,
+		"GET /feeds":	handleGetFeeds,
 	}
 	for e, f := range endpoints {
 		http.Handle(e, httpHandler{f: f})
