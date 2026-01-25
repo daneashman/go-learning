@@ -8,6 +8,14 @@ import (
 	"io"
 )
 
+type Feed struct{
+	Id			string
+	Created_at	string
+	Updated_at	string
+	Name		string
+	Url			string
+}
+
 func httpRes(w http.ResponseWriter, code int, res []byte) {
 	w.WriteHeader(code)
 	_, err := w.Write(res)
@@ -47,16 +55,35 @@ func handleCreateFeed(w http.ResponseWriter, req *http.Request) {
 	// Insert data into db
 	sqlInsertFeed := `
 	INSERT INTO feeds
-	VALUES (DEFAULT, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '%s', '%s');
+	VALUES (DEFAULT, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '%s', '%s')
+	RETURNING *;
 	`
 	q := fmt.Sprintf(sqlInsertFeed, body.FeedName, body.FeedUrl)
-	_, err = db.Query(q)
+	insertedFeedRow, err := db.Query(q)
 	if err != nil {
 		httpRes(w, 400, []byte(fmt.Sprintf("%v", err)))
 		return
 	}
 
-	httpRes(w, 201, []byte(""))
+	// Get ID from db response and return to user
+	if insertedFeedRow.Next() {
+		var insertedFeed Feed
+		err = insertedFeedRow.Scan(&insertedFeed.Id, &insertedFeed.Created_at, &insertedFeed.Updated_at, &insertedFeed.Name, &insertedFeed.Url)
+		if err != nil {
+			httpRes(w, 500, []byte(fmt.Sprintf("%v", err)))
+			return
+		}
+		
+		jsonFeed, err := json.Marshal(insertedFeed)
+		if err != nil {
+			httpRes(w, 500, []byte(fmt.Sprintf("%v", err)))
+			return
+		}
+
+		httpRes(w, 201, jsonFeed)
+	} else {
+		httpRes(w, 500, []byte("Error getting row back from db."))
+	}
 }
 
 func handleGetFeeds(w http.ResponseWriter, req *http.Request) {
@@ -79,13 +106,6 @@ func handleGetFeeds(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Put together array of feeds
-	type Feed struct{
-		Id			string
-		Created_at	string 
-		Updated_at	string
-		Name		string
-		Url			string
-	}
 	var feed Feed
 	feeds := make([]Feed, 0, 12)
 	for feedRows.Next() == true {
