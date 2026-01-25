@@ -9,11 +9,11 @@ import (
 )
 
 type Feed struct{
-	Id			string
-	Created_at	string
-	Updated_at	string
-	Name		string
-	Url			string
+	Id			int		`json:id`
+	CreatedAt	string	`json:created_at`
+	UpdatedAt	string	`json:updated_at`
+	Name		string	`json:name`
+	Url			string	`json:url`
 }
 
 func httpRes(w http.ResponseWriter, code int, res []byte) {
@@ -24,6 +24,9 @@ func httpRes(w http.ResponseWriter, code int, res []byte) {
 	}
 }
 
+/*
+curl -X POST -v http://localhost:8000/feeds -d '{"feed_name":"lips", "feed_url": "lips.com"}'
+*/
 func handleCreateFeed(w http.ResponseWriter, req *http.Request) {
 	// Connect to db
 	db, err := dbConnect()
@@ -68,7 +71,7 @@ func handleCreateFeed(w http.ResponseWriter, req *http.Request) {
 	// Get ID from db response and return to user
 	if insertedFeedRow.Next() {
 		var insertedFeed Feed
-		err = insertedFeedRow.Scan(&insertedFeed.Id, &insertedFeed.Created_at, &insertedFeed.Updated_at, &insertedFeed.Name, &insertedFeed.Url)
+		err = insertedFeedRow.Scan(&insertedFeed.Id, &insertedFeed.CreatedAt, &insertedFeed.UpdatedAt, &insertedFeed.Name, &insertedFeed.Url)
 		if err != nil {
 			httpRes(w, 500, []byte(fmt.Sprintf("%v", err)))
 			return
@@ -109,7 +112,7 @@ func handleGetFeeds(w http.ResponseWriter, req *http.Request) {
 	var feed Feed
 	feeds := make([]Feed, 0, 12)
 	for feedRows.Next() == true {
-		err = feedRows.Scan(&feed.Id, &feed.Created_at, &feed.Updated_at, &feed.Name, &feed.Url)
+		err = feedRows.Scan(&feed.Id, &feed.CreatedAt, &feed.UpdatedAt, &feed.Name, &feed.Url)
 		if err != nil {
 			httpRes(w, 500, []byte(fmt.Sprintf("%v", err)))
 			return
