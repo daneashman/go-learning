@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"net/http"
-	"encoding/json"
 	"github.com/joho/godotenv"
 )
 
@@ -21,8 +20,6 @@ func (h httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	fmt.Println("Starting server.")
-
 	// Set env vars
 	err := godotenv.Load()
 	if err != nil {
