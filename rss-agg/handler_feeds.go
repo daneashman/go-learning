@@ -17,10 +17,20 @@ type Feed struct{
 }
 
 func httpRes(w http.ResponseWriter, code int, res []byte) {
+	// Write a status code
 	w.WriteHeader(code)
+
+	// Create a function for fatal response issues
+	fatalRes := func(err error){
+		w.WriteHeader(500)
+		w.Write([]byte("Fatal error: Server could not construct a response."))
+		log.Fatal(err)
+	}
+
+	// Send res to the writer
 	_, err := w.Write(res)
 	if err != nil {
-		log.Fatal(err)
+		fatalRes(err)
 	}
 }
 
@@ -89,6 +99,9 @@ func handleCreateFeed(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+/*
+curl -X GET -v http://localhost:8000/feeds
+*/
 func handleGetFeeds(w http.ResponseWriter, req *http.Request) {
 	// Connect to db
 	db, err := dbConnect()
