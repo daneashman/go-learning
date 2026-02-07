@@ -67,9 +67,9 @@ func handleCreateFeed(w http.ResponseWriter, req *http.Request) {
 
 	// Insert data into db
 	sqlInsertFeed := `
-	INSERT INTO feeds
+	INSERT INTO feeds (id, created_at, updated_at, name, url)
 	VALUES (DEFAULT, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '%s', '%s')
-	RETURNING *;
+	RETURNING id, created_at, updated_at, name, url;
 	`
 	q := fmt.Sprintf(sqlInsertFeed, body.FeedName, body.FeedUrl)
 	insertedFeedRow, err := db.Query(q)
