@@ -9,11 +9,11 @@ import (
 )
 
 type Feed struct{
-	Id			int		`json:id`
-	CreatedAt	string	`json:created_at`
-	UpdatedAt	string	`json:updated_at`
-	Name		string	`json:name`
-	Url			string	`json:url`
+	Id			int		`json:"id"`
+	CreatedAt	string	`json:"created_at"`
+	UpdatedAt	string	`json:"updated_at"`
+	Name		string	`json:"name"`
+	Url			string	`json:"url"`
 }
 
 func httpRes(w http.ResponseWriter, code int, res []byte) {
