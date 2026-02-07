@@ -3,6 +3,7 @@ CREATE TABLE feeds (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     name TEXT NOT NULL,
-    url TEXT UNIQUE NOT NULL
+    url TEXT UNIQUE NOT NULL,
+    last_fetch TIMESTAMP
 );
 
